@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T20-CLASSIC-AI Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a3a 0%, #0d1b2a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 700px;
+            background: rgba(13, 27, 42, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .membership-modal, .password-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .membership-modal.active, .password-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(25, 40, 65, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            border: 2px solid #3498db;
+        }
+
+        .modal-content h2 {
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            background: rgba(40, 55, 80, 0.7);
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+        }
+
+        .whatsapp-info {
+            background: rgba(37, 211, 102, 0.1);
+            border: 1px solid #25d366;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .whatsapp-info h4 {
+            color: #25d366;
+            margin-bottom: 10px;
+        }
+
+        .whatsapp-number {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #25d366;
+            margin: 10px 0;
+        }
+
+        .plan-options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .plan-option {
+            flex: 1;
+            padding: 15px;
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid #3498db;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .plan-option:hover {
+            background: rgba(52, 152, 219, 0.2);
+        }
+
+        .plan-option.selected {
+            background: rgba(52, 152, 219, 0.3);
+            border-color: #2ecc71;
+        }
+
+        .plan-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2ecc71;
+            margin: 10px 0;
+        }
+
+        .payment-btn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .close-modal {
+            background: #e74c3c;
+            margin-left: 10px;
+        }
+
+        .user-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(25, 40, 65, 0.8);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 100;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .premium-badge {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(8, 20, 32, 0.9);
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .logo-subtext {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+
+        .model-info {
+            background: rgba(25, 40, 65, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .model-info h3 {
+            font-size: 0.9rem;
+            color: #3498db;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .model-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            position: relative;
+        }
+
+        .model-option:hover {
+            background: rgba(52, 152, 219, 0.2);
+        }
+
+        .model-option.active {
+            background: rgba(52, 152, 219, 0.3);
+            border-left: 3px solid #3498db;
+        }
+
+        .model-option.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .model-option.locked:hover {
+            background: transparent;
+        }
+
+        .lock-icon {
+            position: absolute;
+            right: 12px;
+            color: #f39c12;
+        }
+
+        .model-option i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+
+        .chat-history {
+            background: rgba(25, 40, 65, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+
+        .chat-history h3 {
+            font-size: 0.9rem;
+            color: #3498db;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .history-item {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+            background: rgba(40, 55, 80, 0.5);
+            border-left: 3px solid transparent;
+        }
+
+        .history-item:hover {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+        }
+
+        .history-item.active {
+            background: rgba(52, 152, 219, 0.3);
+            border-left-color: #3498db;
+        }
+
+        .history-item .date {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* This is crucial for scrolling */
+        }
+
+        .chat-header {
+            background: rgba(18, 33, 53, 0.9);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+
+        .chat-header h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 0; /* This is crucial for scrolling */
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.4s ease-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: rgba(30, 45, 62, 0.8);
+            color: #e0e0e0;
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .message-header i {
+            margin-right: 8px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 15px;
+            background: rgba(18, 33, 53, 0.7);
+            flex-shrink: 0;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            outline: none;
+            font-size: 1rem;
+            background: rgba(25, 40, 65, 0.7);
+            color: #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .chat-input::placeholder {
+            color: #7f8c8d;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            padding: 15px 20px;
+            background: rgba(30, 45, 62, 0.8);
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background: #3498db;
+            display: inline-block;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: bounce 1.3s linear infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .token-info {
+            padding: 15px 20px;
+            background: rgba(18, 33, 53, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            display: flex;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .token-info strong {
+            color: #3498db;
+        }
+
+        .error-message {
+            align-self: flex-start;
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .clear-chat-btn {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .clear-chat-btn:hover {
+            background: rgba(231, 76, 60, 0.3);
+        }
+
+        .upgrade-prompt {
+            background: rgba(243, 156, 18, 0.1);
+            border: 1px solid rgba(243, 156, 18, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .upgrade-prompt h4 {
+            color: #f39c12;
+            margin-bottom: 8px;
+        }
+
+        .upgrade-btn {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .upgrade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        .chat-messages::-webkit-scrollbar,
+        .chat-history::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track,
+        .chat-history::-webkit-scrollbar-track {
+            background: rgba(25, 40, 65, 0.5);
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb,
+        .chat-history::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover,
+        .chat-history::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+            }
+            
+            body {
+                padding: 0;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Membership Modal -->
+        <div class="membership-modal" id="membershipModal">
+            <div class="modal-content">
+                <h2>Upgrade to Premium</h2>
+                <p>Unlock advanced AI models with faster responses and enhanced capabilities</p>
+                
+                <div class="plan-options">
+                    <div class="plan-option" data-plan="monthly">
+                        <h3>Monthly</h3>
+                        <div class="plan-price">$9.99/month</div>
+                        <p>Full access to all models</p>
+                    </div>
+                    <div class="plan-option selected" data-plan="yearly">
+                        <h3>Yearly</h3>
+                        <div class="plan-price">$99.99/year</div>
+                        <p>Save 20%</p>
+                    </div>
+                </div>
+                
+                <button class="payment-btn" id="confirmPayment">
+                    <i class="fas fa-credit-card"></i> Upgrade Now
+                </button>
+                <button class="payment-btn close-modal" id="closeModal">
+                    Maybe Later
+                </button>
+            </div>
+        </div>
+
+        <!-- Password Modal for Pro Access -->
+        <div class="password-modal" id="passwordModal">
+            <div class="modal-content">
+                <h2>Pro Model Access</h2>
+                <p>To access T20-CLASSIC Pro, you need a password from our support team</p>
+                
+                <div class="whatsapp-info">
+                    <h4><i class="fab fa-whatsapp"></i> Contact Support</h4>
+                    <p>Message us on WhatsApp to get your password:</p>
+                    <div class="whatsapp-number">+255 627 417 402</div>
+                    <p>Send "PRO ACCESS" to receive your password</p>
+                </div>
+                
+                <input type="password" class="password-input" id="proPassword" placeholder="Enter Pro Access Password">
+                
+                <button class="payment-btn" id="verifyProPassword">
+                    <i class="fas fa-key"></i> Verify Password
+                </button>
+                <button class="payment-btn close-modal" id="closePasswordModal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <!-- User Status -->
+        <div class="user-status" id="userStatus">
+            <i class="fas fa-user"></i> Free User
+            <span class="premium-badge" style="display: none;" id="premiumBadge">PREMIUM</span>
+        </div>
+
+        <div class="sidebar">
+            <div class="logo-container">
+                <div class="logo" id="aiLogo">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="logo-text">T20-CLASSIC</div>
+                <div class="logo-subtext">AI ASSISTANT</div>
+            </div>
+            
+            <div class="model-info">
+                <h3>AI Models</h3>
+                <div class="model-option active" data-model="wormgpt-v6.5" id="standardModel">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>T20-CLASSIC Standard</span>
+                </div>
+                <div class="model-option locked" data-model="wormgpt-v7" id="proModel">
+                    <i class="fas fa-rocket"></i>
+                    <span>T20-CLASSIC Pro</span>
+                    <i class="fas fa-lock lock-icon"></i>
+                </div>
+                <div class="model-option locked" data-model="wormgpt-turbo" id="turboModel">
+                    <i class="fas fa-bolt"></i>
+                    <span>T20-CLASSIC Turbo</span>
+                    <i class="fas fa-lock lock-icon"></i>
+                </div>
+            </div>
+
+            <!-- Upgrade Prompt -->
+            <div class="upgrade-prompt">
+                <h4>Upgrade for Premium Features</h4>
+                <p>Get access to Pro and Turbo models</p>
+                <button class="upgrade-btn" id="upgradeBtn">
+                    <i class="fas fa-crown"></i> Upgrade Now
+                </button>
+            </div>
+            
+            <div class="chat-history">
+                <h3>Chat History</h3>
+                <div id="historyList">
+                    <!-- Chat sessions will appear here -->
+                </div>
+                <div class="clear-chat-btn" id="clearChatBtn">
+                    <i class="fas fa-trash"></i> Clear All History
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-main">
+            <div class="chat-header">
+                <h1>T20-CLASSIC AI Assistant</h1>
+                <p>Standard model - <strong>Free</strong> | Contact support for Pro access</p>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-header">
+                        <i class="fas fa-robot"></i>
+                        T20-CLASSIC AI (Standard)
+                    </div>
+                    Hello! I'm your T20-CLASSIC AI assistant. You're using our <strong>free Standard model</strong>. For Pro access, contact our support team on WhatsApp: <strong>+255 627 417 402</strong>
+                </div>
+            </div>
+            
+            <div class="token-info">
+                <span>Model: <strong id="modelInfo">T20-CLASSIC Standard</strong></span>
+                <span>Status: <strong id="apiStatus">Ready</strong></span>
+                <span>Plan: <strong id="planStatus">Free</strong></span>
+            </div>
+            
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="userInput" placeholder="Ask T20-CLASSIC AI anything..." autocomplete="off">
+                <button class="send-button" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const modelInfo = document.getElementById('modelInfo');
+        const apiStatus = document.getElementById('apiStatus');
+        const planStatus = document.getElementById('planStatus');
+        const aiLogo = document.getElementById('aiLogo');
+        const historyList = document.getElementById('historyList');
+        const clearChatBtn = document.getElementById('clearChatBtn');
+        const membershipModal = document.getElementById('membershipModal');
+        const passwordModal = document.getElementById('passwordModal');
+        const userStatus = document.getElementById('userStatus');
+        const premiumBadge = document.getElementById('premiumBadge');
+        const upgradeBtn = document.getElementById('upgradeBtn');
+        const confirmPayment = document.getElementById('confirmPayment');
+        const closeModal = document.getElementById('closeModal');
+        const closePasswordModal = document.getElementById('closePasswordModal');
+        const verifyProPassword = document.getElementById('verifyProPassword');
+        const proPassword = document.getElementById('proPassword');
+        const standardModel = document.getElementById('standardModel');
+        const proModel = document.getElementById('proModel');
+        const turboModel = document.getElementById('turboModel');
+
+        // T20-CLASSIC AI Configuration (using WormGPT API)
+        const T20_CONFIG = {
+            apiKey: 'sk_live_4d8d295a-a419-4bec-b262-56698cf8b14237b2',
+            endpoint: 'https://api.wrmgpt.com/v1/chat/completions',
+            model: 'wormgpt-v6.5', // Default to free model
+            temperature: 0.7,
+            max_tokens: 1000
+        };
+
+        // Valid passwords for Pro access (in real app, this would be server-side)
+        const VALID_PRO_PASSWORDS = [
+            "T20PRO2024",
+            "CLASSICPRO",
+            "PREMIUMACCESS",
+            "SUPPORT2024"
+        ];
+
+        // User management system
+        let currentUser = {
+            isPremium: false,
+            planType: 'free',
+            hasProAccess: false,
+            subscriptionEnd: null
+        };
+
+        // Chat memory system
+        let conversationHistory = [];
+        let chatSessions = [];
+        let currentSessionId = null;
+
+        // Initialize application
+        function initializeApp() {
+            loadUserData();
+            initializeChatMemory();
+            updateUIForUserStatus();
+        }
+
+        // Load user data from localStorage
+        function loadUserData() {
+            const savedUser = localStorage.getItem('t20_user_data');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                
+                // Check if subscription is still valid
+                if (currentUser.isPremium && currentUser.subscriptionEnd) {
+                    if (new Date() > new Date(currentUser.subscriptionEnd)) {
+                        currentUser.isPremium = false;
+                        currentUser.planType = 'free';
+                        saveUserData();
+                    }
+                }
+            }
+        }
+
+        // Save user data to localStorage
+        function saveUserData() {
+            localStorage.setItem('t20_user_data', JSON.stringify(currentUser));
+        }
+
+        // Update UI based on user status
+        function updateUIForUserStatus() {
+            if (currentUser.isPremium || currentUser.hasProAccess) {
+                // Premium or Pro user
+                userStatus.innerHTML = '<i class="fas fa-crown"></i> Premium User';
+                premiumBadge.style.display = 'inline-block';
+                planStatus.textContent = 'Premium';
+                planStatus.style.color = '#f39c12';
+                
+                // Unlock premium models
+                proModel.classList.remove('locked');
+                turboModel.classList.remove('locked');
+                proModel.querySelector('.lock-icon').style.display = 'none';
+                turboModel.querySelector('.lock-icon').style.display = 'none';
+                
+                // Hide upgrade prompt
+                document.querySelector('.upgrade-prompt').style.display = 'none';
+            } else {
+                // Free user
+                userStatus.innerHTML = '<i class="fas fa-user"></i> Free User';
+                premiumBadge.style.display = 'none';
+                planStatus.textContent = 'Free';
+                planStatus.style.color = '#3498db';
+                
+                // Lock premium models
+                proModel.classList.add('locked');
+                turboModel.classList.add('locked');
+                proModel.querySelector('.lock-icon').style.display = 'block';
+                turboModel.querySelector('.lock-icon').style.display = 'block';
+                
+                // Show upgrade prompt
+                document.querySelector('.upgrade-prompt').style.display = 'block';
+                
+                // Ensure only standard model is active
+                if (T20_CONFIG.model !== 'wormgpt-v6.5') {
+                    switchModel('wormgpt-v6.5', 'T20-CLASSIC Standard');
+                    standardModel.classList.add('active');
+                    proModel.classList.remove('active');
+                    turboModel.classList.remove('active');
+                }
+            }
+        }
+
+        // Simulate payment processing
+        function processPayment(planType) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // In a real app, this would integrate with Stripe, PayPal, etc.
+                    const success = Math.random() > 0.1; // 90% success rate for demo
+                    
+                    if (success) {
+                        currentUser.isPremium = true;
+                        currentUser.planType = planType;
+                        
+                        // Set subscription end date
+                        const endDate = new Date();
+                        if (planType === 'monthly') {
+                            endDate.setMonth(endDate.getMonth() + 1);
+                        } else {
+                            endDate.setFullYear(endDate.getFullYear() + 1);
+                        }
+                        currentUser.subscriptionEnd = endDate.toISOString();
+                        
+                        saveUserData();
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                }, 2000);
+            });
+        }
+
+        // Verify Pro password
+        function verifyPassword(password) {
+            return VALID_PRO_PASSWORDS.includes(password.toUpperCase());
+        }
+
+        // Show membership modal
+        function showMembershipModal() {
+            membershipModal.classList.add('active');
+        }
+
+        // Show password modal for Pro access
+        function showPasswordModal() {
+            passwordModal.classList.add('active');
+            proPassword.value = '';
+            proPassword.focus();
+        }
+
+        // Hide all modals
+        function hideAllModals() {
+            membershipModal.classList.remove('active');
+            passwordModal.classList.remove('active');
+        }
+
+        // Initialize chat memory
+        function initializeChatMemory() {
+            const savedSessions = localStorage.getItem('t20_chat_sessions');
+            if (savedSessions) {
+                chatSessions = JSON.parse(savedSessions);
+                renderChatHistory();
+            }
+            
+            if (chatSessions.length === 0) {
+                createNewSession();
+            } else {
+                loadSession(chatSessions[chatSessions.length - 1].id);
+            }
+        }
+
+        // Create a new chat session
+        function createNewSession() {
+            const sessionId = 'session_' + Date.now();
+            const session = {
+                id: sessionId,
+                name: 'New Chat ' + (chatSessions.length + 1),
+                timestamp: new Date().toISOString(),
+                messages: []
+            };
+            
+            chatSessions.push(session);
+            currentSessionId = sessionId;
+            conversationHistory = [];
+            
+            saveSessionsToStorage();
+            renderChatHistory();
+            clearChatMessages();
+            
+            const welcomeMessage = currentUser.isPremium || currentUser.hasProAccess
+                ? "Hello! I'm your T20-CLASSIC AI assistant (Premium). How can I help you today?"
+                : "Hello! I'm your T20-CLASSIC AI assistant (Standard). For Pro access, contact our support team on WhatsApp: +255 627 417 402";
+            
+            addMessage(welcomeMessage, false);
+            
+            return sessionId;
+        }
+
+        // Load a chat session
+        function loadSession(sessionId) {
+            const session = chatSessions.find(s => s.id === sessionId);
+            if (session) {
+                currentSessionId = sessionId;
+                conversationHistory = [...session.messages];
+                renderChatHistory();
+                renderChatMessages();
+            }
+        }
+
+        // Save sessions to localStorage
+        function saveSessionsToStorage() {
+            localStorage.setItem('t20_chat_sessions', JSON.stringify(chatSessions));
+        }
+
+        // Save current conversation to session
+        function saveCurrentConversation() {
+            const sessionIndex = chatSessions.findIndex(s => s.id === currentSessionId);
+            if (sessionIndex !== -1) {
+                chatSessions[sessionIndex].messages = [...conversationHistory];
+                chatSessions[sessionIndex].timestamp = new Date().toISOString();
+                
+                if (conversationHistory.length > 0) {
+                    const firstUserMessage = conversationHistory.find(msg => msg.role === 'user');
+                    if (firstUserMessage) {
+                        const shortMessage = firstUserMessage.content.substring(0, 30);
+                        chatSessions[sessionIndex].name = shortMessage + (firstUserMessage.content.length > 30 ? '...' : '');
+                    }
+                }
+                
+                saveSessionsToStorage();
+                renderChatHistory();
+            }
+        }
+
+        // Render chat history sidebar
+        function renderChatHistory() {
+            historyList.innerHTML = '';
+            
+            chatSessions.forEach(session => {
+                const historyItem = document.createElement('div');
+                historyItem.classList.add('history-item');
+                if (session.id === currentSessionId) {
+                    historyItem.classList.add('active');
+                }
+                
+                historyItem.innerHTML = `
+                    <div>${session.name}</div>
+                    <div class="date">${new Date(session.timestamp).toLocaleDateString()}</div>
+                `;
+                
+                historyItem.addEventListener('click', () => {
+                    loadSession(session.id);
+                });
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Render chat messages
+        function renderChatMessages() {
+            clearChatMessages();
+            conversationHistory.forEach(msg => {
+                addMessage(msg.content, msg.role === 'user', false, true);
+            });
+        }
+
+        // Clear chat messages from UI
+        function clearChatMessages() {
+            chatMessages.innerHTML = '';
+        }
+
+        // Function to add a message to the chat
+        function addMessage(content, isUser = false, isError = false, noAnimation = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            
+            if (noAnimation) {
+                messageDiv.style.animation = 'none';
+            }
+            
+            if (isError) {
+                messageDiv.classList.add('bot-message', 'error-message');
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        T20-CLASSIC AI
+                    </div>
+                    ${content}
+                `;
+            } else {
+                messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+                
+                if (!isUser) {
+                    const modelName = currentUser.isPremium || currentUser.hasProAccess ? 'T20-CLASSIC AI (Premium)' : 'T20-CLASSIC AI (Standard)';
+                    messageDiv.innerHTML = `
+                        <div class="message-header">
+                            <i class="fas fa-robot"></i>
+                            ${modelName}
+                        </div>
+                        ${content}
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="message-header">
+                            <i class="fas fa-user"></i>
+                            You
+                        </div>
+                        ${content}
+                    `;
+                }
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Function to show typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.classList.add('typing-indicator');
+            typingDiv.id = 'typingIndicator';
+            const modelName = currentUser.isPremium || currentUser.hasProAccess ? 'T20-CLASSIC AI (Premium)' : 'T20-CLASSIC AI (Standard)';
+            typingDiv.innerHTML = `
+                <div class="message-header">
+                    <i class="fas fa-robot"></i>
+                    ${modelName}
+                </div>
+                <span></span><span></span><span></span>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            apiStatus.textContent = 'Thinking...';
+        }
+
+        // Function to hide typing indicator
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+            apiStatus.textContent = 'Ready';
+        }
+
+        // Main function to call WormGPT API
+        async function callT20API(message) {
+            try {
+                // Add the new user message to conversation history
+                conversationHistory.push({ role: 'user', content: message });
+                
+                const response = await fetch(T20_CONFIG.endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${T20_CONFIG.apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: T20_CONFIG.model,
+                        messages: conversationHistory,
+                        temperature: T20_CONFIG.temperature,
+                        max_tokens: T20_CONFIG.max_tokens
+                    })
+                });
+
+                if (!response.ok) {
+                    conversationHistory.pop();
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    const assistantMessage = data.choices[0].message.content;
+                    conversationHistory.push({ role: 'assistant', content: assistantMessage });
+                    return assistantMessage;
+                } else {
+                    throw new Error('Unexpected response format from API');
+                }
+
+            } catch (error) {
+                console.error('T20-CLASSIC API Error:', error);
+                
+                if (error.message.includes('401')) {
+                    return 'Error: Invalid API key. Please check your API key.';
+                } else if (error.message.includes('429')) {
+                    return 'Error: Rate limit exceeded or insufficient tokens. Please try again later.';
+                } else if (error.message.includes('network') || error.message.includes('Failed to fetch')) {
+                    return 'Error: Network connection failed. Please check your internet connection.';
+                } else {
+                    return `Error: ${error.message}`;
+                }
+            }
+        }
+
+        // Function to handle sending a message
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            if (!currentSessionId) {
+                createNewSession();
+            }
+
+            addMessage(message, true);
+            userInput.value = '';
+            userInput.disabled = true;
+            sendButton.disabled = true;
+
+            showTypingIndicator();
+
+            try {
+                const apiResponse = await callT20API(message);
+                hideTypingIndicator();
+                
+                if (apiResponse.startsWith('Error:')) {
+                    addMessage(apiResponse, false, true);
+                } else {
+                    addMessage(apiResponse);
+                    saveCurrentConversation();
+                }
+
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage(`Unexpected error: ${error.message}`, false, true);
+            } finally {
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Function to switch AI models
+        function switchModel(newModel, displayName) {
+            // Check if user is trying to access Pro model without access
+            if (newModel === 'wormgpt-v7' && !currentUser.hasProAccess && !currentUser.isPremium) {
+                showPasswordModal();
+                return;
+            }
+
+            // Check if user is trying to access premium models without subscription
+            if ((newModel === 'wormgpt-v7' || newModel === 'wormgpt-turbo') && !currentUser.isPremium && !currentUser.hasProAccess) {
+                addMessage(`🚫 The ${displayName} is only available for premium users or with Pro access. Contact support on WhatsApp: +255 627 417 402`, false);
+                return;
+            }
+
+            T20_CONFIG.model = newModel;
+            modelInfo.textContent = displayName;
+            addMessage(`Model switched to: ${displayName}`, false);
+            
+            // Update active model in sidebar
+            document.querySelectorAll('.model-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.closest('.model-option').classList.add('active');
+        }
+
+        // Clear all chat history
+        function clearAllHistory() {
+            if (confirm('Are you sure you want to clear all chat history? This action cannot be undone.')) {
+                chatSessions = [];
+                localStorage.removeItem('t20_chat_sessions');
+                createNewSession();
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage');
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !userInput.disabled) {
+                sendMessage();
+            }
+        });
+
+        // Model switching
+        document.querySelectorAll('.model-option').forEach(option => {
+            option.addEventListener('click', function() {
+                if (this.classList.contains('locked')) {
+                    const model = this.getAttribute('data-model');
+                    if (model === 'wormgpt-v7') {
+                        showPasswordModal();
+                    } else {
+                        showMembershipModal();
+                    }
+                    return;
+                }
+                const model = this.getAttribute('data-model');
+                const displayName = this.querySelector('span').textContent;
+                switchModel(model, displayName);
+            });
+        });
+
+        // Membership and payment events
+        upgradeBtn.addEventListener('click', showMembershipModal);
+        closeModal.addEventListener('click', hideAllModals);
+        closePasswordModal.addEventListener('click', hideAllModals);
+        
+        confirmPayment.addEventListener('click', async function() {
+            const selectedPlan = document.querySelector('.plan-option.selected').getAttribute('data-plan');
+            confirmPayment.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            confirmPayment.disabled = true;
+            
+            const success = await processPayment(selectedPlan);
+            
+            if (success) {
+                addMessage('🎉 Welcome to T20-CLASSIC Premium! You now have access to all AI models with enhanced capabilities.', false);
+                hideAllModals();
+                updateUIForUserStatus();
+            } else {
+                addMessage('❌ Payment failed. Please try again or use a different payment method.', false, true);
+            }
+            
+            confirmPayment.innerHTML = '<i class="fas fa-credit-card"></i> Upgrade Now';
+            confirmPayment.disabled = false;
+        });
+
+        // Password verification for Pro access
+        verifyProPassword.addEventListener('click', function() {
+            const password = proPassword.value.trim();
+            
+            if (!password) {
+                addMessage('❌ Please enter a password', false, true);
+                return;
+            }
+            
+            if (verifyPassword(password)) {
+                currentUser.hasProAccess = true;
+                saveUserData();
+                addMessage('🎉 Pro access granted! You can now use T20-CLASSIC Pro model.', false);
+                hideAllModals();
+                updateUIForUserStatus();
+                
+                // Switch to Pro model automatically
+                T20_CONFIG.model = 'wormgpt-v7';
+                modelInfo.textContent = 'T20-CLASSIC Pro';
+                document.querySelectorAll('.model-option').forEach(option => {
+                    option.classList.remove('active');
+                });
+                proModel.classList.add('active');
+            } else {
+                addMessage('❌ Invalid password. Please contact support on WhatsApp: +255 627 417 402', false, true);
+                proPassword.value = '';
+                proPassword.focus();
+            }
+        });
+
+        // Plan selection
+        document.querySelectorAll('.plan-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.plan-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            });
+        });
+
+        clearChatBtn.addEventListener('click', clearAllHistory);
+
+        // Initialize the application
+        initializeApp();
+        userInput.focus();
+
+        console.log('T20-CLASSIC AI with WhatsApp Support System initialized.');
+    </script>
+</body>
+</html>
