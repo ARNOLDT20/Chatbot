@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T20-CLASSIC-AI Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a3a 0%, #0d1b2a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 700px;
+            background: rgba(13, 27, 42, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(8, 20, 32, 0.9);
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .logo-subtext {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+
+        .model-info {
+            background: rgba(25, 40, 65, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .model-info h3 {
+            font-size: 0.9rem;
+            color: #3498db;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .model-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .model-option:hover {
+            background: rgba(52, 152, 219, 0.2);
+        }
+
+        .model-option.active {
+            background: rgba(52, 152, 219, 0.3);
+            border-left: 3px solid #3498db;
+        }
+
+        .model-option i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: rgba(18, 33, 53, 0.9);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-header h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.4s ease-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: rgba(30, 45, 62, 0.8);
+            color: #e0e0e0;
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .message-header i {
+            margin-right: 8px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 15px;
+            background: rgba(18, 33, 53, 0.7);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            outline: none;
+            font-size: 1rem;
+            background: rgba(25, 40, 65, 0.7);
+            color: #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .chat-input::placeholder {
+            color: #7f8c8d;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            padding: 15px 20px;
+            background: rgba(30, 45, 62, 0.8);
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background: #3498db;
+            display: inline-block;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: bounce 1.3s linear infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .token-info {
+            padding: 15px 20px;
+            background: rgba(18, 33, 53, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .token-info strong {
+            color: #3498db;
+        }
+
+        .error-message {
+            align-self: flex-start;
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(25, 40, 65, 0.5);
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+            }
+            
+            body {
+                padding: 0;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="sidebar">
+            <div class="logo-container">
+                <div class="logo" id="aiLogo">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="logo-text">T20-CLASSIC</div>
+                <div class="logo-subtext">AI ASSISTANT</div>
+            </div>
+            
+            <div class="model-info">
+                <h3>AI Models</h3>
+                <div class="model-option active" data-model="wormgpt-v7">
+                    <i class="fas fa-rocket"></i>
+                    <span>T20-CLASSIC Pro</span>
+                </div>
+                <div class="model-option" data-model="wormgpt-v6.5">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>T20-CLASSIC Standard</span>
+                </div>
+                <div class="model-option" data-model="wormgpt-turbo">
+                    <i class="fas fa-bolt"></i>
+                    <span>T20-CLASSIC Turbo</span>
+                </div>
+            </div>
+            
+            <div class="model-info">
+                <h3>Capabilities</h3>
+                <div style="font-size: 0.8rem; line-height: 1.6;">
+                    <div><i class="fas fa-check" style="color: #2ecc71; margin-right: 8px;"></i> Natural Conversations</div>
+                    <div><i class="fas fa-check" style="color: #2ecc71; margin-right: 8px;"></i> Code Generation</div>
+                    <div><i class="fas fa-check" style="color: #2ecc71; margin-right: 8px;"></i> Content Creation</div>
+                    <div><i class="fas fa-check" style="color: #2ecc71; margin-right: 8px;"></i> Problem Solving</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-main">
+            <div class="chat-header">
+                <h1>T20-CLASSIC AI Assistant</h1>
+                <p>Advanced AI powered by cutting-edge technology</p>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-header">
+                        <i class="fas fa-robot"></i>
+                        T20-CLASSIC AI
+                    </div>
+                    Hello! I'm your T20-CLASSIC AI assistant. How can I help you today?
+                </div>
+            </div>
+            
+            <div class="token-info">
+                <span>Model: <strong id="modelInfo">T20-CLASSIC Pro</strong></span>
+                <span>
+                    <label style="font-size:0.8rem;opacity:0.9;display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="fastMode" />
+                        <small>Fast Response</small>
+                    </label>
+                </span>
+                <span>Status: <strong id="apiStatus">Ready</strong></span>
+            </div>
+            
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="userInput" placeholder="Ask T20-CLASSIC AI anything..." autocomplete="off">
+                <button class="send-button" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const modelInfo = document.getElementById('modelInfo');
+        const apiStatus = document.getElementById('apiStatus');
+        const aiLogo = document.getElementById('aiLogo');
+
+        // T20-CLASSIC AI Configuration
+        // NOTE: API key moved to server-side. Client will call `/api/chat`.
+        const T20_CONFIG = {
+            endpoint: '/api/chat', // local proxy endpoint
+            model: 'wormgpt-v7',
+            temperature: 0.7,
+            max_tokens: 1000
+        };
+
+        // Function to add a message to the chat (adds a small copy button)
+        function addMessage(content, isUser = false, isError = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+
+            if (isError) {
+                messageDiv.classList.add('bot-message', 'error-message');
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        T20-CLASSIC AI
+                    </div>
+                    ${content}
+                `;
+            } else {
+                messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+
+                const header = isUser ? `
+                        <div class="message-header">
+                            <i class="fas fa-user"></i>
+                            You
+                        </div>` : `
+                        <div class="message-header">
+                            <i class="fas fa-robot"></i>
+                            T20-CLASSIC AI
+                        </div>`;
+
+                messageDiv.innerHTML = `${header}
+                    <div class="message-content">${content}</div>
+                    <button class="copy-btn" title="Copy" aria-label="Copy message"><i class="fas fa-copy"></i></button>`;
+            }
+
+            // Style and behaviour for copy button
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            const copyBtn = messageDiv.querySelector('.copy-btn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    const text = messageDiv.querySelector('.message-content')?.innerText || '';
+                    navigator.clipboard.writeText(text).then(() => {
+                        // brief visual feedback
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+                        setTimeout(() => { copyBtn.innerHTML = '<i class="fas fa-copy"></i>'; }, 1200);
+                    }).catch(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-exclamation"></i>';
+                        setTimeout(() => { copyBtn.innerHTML = '<i class="fas fa-copy"></i>'; }, 1200);
+                    });
+                });
+            }
+        }
+
+        // Function to show typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.classList.add('typing-indicator');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-header">
+                    <i class="fas fa-robot"></i>
+                    T20-CLASSIC AI
+                </div>
+                <span></span><span></span><span></span>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            apiStatus.textContent = 'Thinking...';
+        }
+
+        // Function to hide typing indicator
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+            apiStatus.textContent = 'Ready';
+        }
+
+        // Main function to call server-side proxy which forwards to WormGPT
+        async function callT20API(message, opts = {}) {
+            try {
+                const payload = {
+                    message,
+                    model: T20_CONFIG.model,
+                    temperature: typeof opts.temperature === 'number' ? opts.temperature : T20_CONFIG.temperature,
+                    max_tokens: typeof opts.max_tokens === 'number' ? opts.max_tokens : T20_CONFIG.max_tokens
+                };
+
+                const response = await fetch(T20_CONFIG.endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.reply) return data.reply;
+                if (data.error) throw new Error(data.error);
+                throw new Error('Unexpected response from server');
+
+            } catch (error) {
+                console.error('T20-CLASSIC API Error:', error);
+                if (error.message.includes('API key') || error.message.includes('not configured')) {
+                    return 'Error: Server API key not configured. Please contact the administrator.';
+                }
+                return `Error: ${error.message}`;
+            }
+        }
+
+        // Function to handle sending a message
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, true);
+            userInput.value = '';
+
+            // Quick-owner/creator check: reply locally with mention of T20_STARBOY
+            const ownerPatterns = [
+                /\b(owner|creator)\b/i,
+                /\bwho (?:created|made|built|developed) (?:you|this)\b/i,
+                /\bwho (?:is )?(?:your )?(?:owner|creator)\b/i,
+                /\bwho (?:made|built|created) you\b/i
+            ];
+
+            if (ownerPatterns.some((r) => r.test(message))) {
+                // Reply immediately mentioning T20_STARBOY, preserving existing bot style
+                addMessage('I was created by T20_STARBOY.');
+                userInput.focus();
+                return;
+            }
+
+            // Determine fast mode options
+            const fastMode = document.getElementById('fastMode')?.checked;
+            const opts = {};
+            if (fastMode) {
+                // Faster and cheaper: lower max tokens and slightly lower temperature
+                opts.max_tokens = 150;
+                opts.temperature = 0.3;
+            }
+
+            userInput.disabled = true;
+            sendButton.disabled = true;
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                // Call server proxy API
+                const apiResponse = await callT20API(message, opts);
+
+                // Hide typing indicator and add bot response
+                hideTypingIndicator();
+
+                if (apiResponse.startsWith && apiResponse.startsWith('Error:')) {
+                    addMessage(apiResponse, false, true);
+                } else {
+                    addMessage(apiResponse);
+                }
+
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage(`Unexpected error: ${error.message}`, false, true);
+            } finally {
+                // Re-enable input
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Function to switch AI models
+        function switchModel(newModel, displayName) {
+            T20_CONFIG.model = newModel;
+            modelInfo.textContent = displayName;
+            addMessage(`Model switched to: ${displayName}`);
+            
+            // Update active model in sidebar
+            document.querySelectorAll('.model-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.closest('.model-option').classList.add('active');
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !userInput.disabled) {
+                sendMessage();
+            }
+        });
+
+        // Model switching
+        document.querySelectorAll('.model-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const model = this.getAttribute('data-model');
+                const displayName = this.querySelector('span').textContent;
+                switchModel(model, displayName);
+            });
+        });
+
+        // Logo customization - you can replace this with your own logo
+        // Example: aiLogo.innerHTML = '<img src="your-logo.png" alt="T20-CLASSIC AI Logo" style="width:100%;border-radius:50%;">';
+        
+        // Focus on input when page loads
+        userInput.focus();
+
+        console.log('T20-CLASSIC AI Chat initialized.');
+    </script>
+</body>
+</html>
