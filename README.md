@@ -1,5 +1,8 @@
 # T20-CLASSIC AI (T20-CLASSIC)
+ 
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy?template=https://github.com/OWNER/REPO)
 
+Replace `OWNER/REPO` in the button URL with your GitHub username and repository name (for example: `https://github.com/youruser/yourrepo`).
 This project is a single-file chat UI (`wormgpt[1].html`) that connects to the WormGPT/T20 API. It now includes a small local owner/creator check: when asked about the owner/creator it replies `I was created by T20_STARBOY`.
 
 Files added for deployment:
